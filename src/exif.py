@@ -5,13 +5,16 @@ from machina.core.worker import Worker
 import exifread
 
 class Exif(Worker):
-    types = ['png', 'jpeg']
+    types = [
+        'png',
+        'jpeg',
+        'tiff'
+    ]
 
     def __init__(self, *args, **kwargs):
         super(Exif, self).__init__(*args, **kwargs)
 
     def callback(self, data, properties):
-        # self.logger.info(data)
         data = json.loads(data)
 
         # resolve path
@@ -28,6 +31,10 @@ class Exif(Worker):
         for t in exif_tags.keys():
             tags[t] = str(exif_tags[t])
 
-        png = self.graph.get_vertex(data['id'])
-        png.exif = tags
-        png.save()
+        # get the appropriate OGM class for the image that was analyzed
+        image_cls = self.resolve_db_node_cls(data['type'])
+        obj = image_cls.nodes.get(uid=data['uid'])
+
+        # update
+        obj.exif = tags
+        obj.save()
