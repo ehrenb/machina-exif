@@ -1,6 +1,7 @@
 import json
 
 from machina.core.worker import Worker
+from machina.core.models.utils import resolve_db_node_cls
 
 import exifread
 
@@ -32,7 +33,7 @@ class Exif(Worker):
             tags[t] = str(exif_tags[t])
 
         # get the appropriate OGM class for the image that was analyzed
-        image_cls = self.resolve_db_node_cls(data['type'])
+        image_cls = resolve_db_node_cls(data['type'])
         obj = image_cls.nodes.get(uid=data['uid'])
 
         # update
